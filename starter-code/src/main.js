@@ -24,28 +24,61 @@ var cards = [
   { name: 'the avengers',    img: 'the-avengers.jpg' },
   { name: 'thor',            img: 'thor.jpg' }
 ];
-var memoryGame = new MemoryGame(cards);
+var pairsClicked = 0;
+var pairsGuessed = 0;
+var turn = [];
+var memoryGame = new MemoryGame(cards, pairsClicked, pairsGuessed);
 
-
-document.addEventListener("DOMContentLoaded", function(event) { 
+$(document).ready(function(event) {
+  memoryGame.shuffleCards(memoryGame.cards)
   var html = '';
   memoryGame.cards.forEach(function (pic) {
     html += '<div class="card" data-card-name="'+ pic.name +'">';
     html += '  <div class="back" name="'+ pic.img +'"></div>';
     html += '  <div class="front" style="background: url(img/'+ pic.img +') no-repeat"></div>';
     html += '</div>';
-  });
+  })
 
   // Add all the div's to the HTML
-  document.querySelector('#memory_board').innerHTML = html;
+  $('#memory_board').html(html)
 
   // Bind the click event of each element to a function
-  document.querySelectorAll('.back').forEach(function(card) {
-    card.onclick = function() {
-      // TODO: write some code here
-      console.log('Card clicked')
+  $(".card div").on("click", function(event) {
+  let card = event.currentTarget
+  $(card).toggleClass("back front");
+  $(card).siblings().toggleClass("back front");
+  //do not allow player to click same card twice by removing event listener
+  turn.push(card)
+
+  if(turn.length == 2){ 
+
+    $("#pairs_clicked").html(++pairsClicked);
+
+    if(memoryGame.checkIfPair($(turn[0]).attr("name"), $(turn[1]).attr("name"))){ 
+      $("#pairs_guessed").html(++pairsGuessed)
+      $(turn[0]).siblings().unbind()
+      $(turn[1]).siblings().unbind()
+      turn.pop()
+      turn.pop()
+      if(pairsGuessed==12){
+        alert("You win!")
+      }
+      return
     }
+
+    setTimeout(function(){
+      $(turn[0]).toggleClass("back front")
+      $(turn[0]).siblings().toggleClass("back front")
+      $(turn[1]).toggleClass("back front")
+      $(turn[1]).siblings().toggleClass("back front")
+      turn.pop()
+      turn.pop()
+    }, 300)
+  }
+
+
   });
+
 });
 
 
